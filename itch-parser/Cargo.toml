@@ -1,0 +1,11 @@
+[package]
+name = "itch-parser"
+version = "0.1.0"
+edition = "2021"
+description = "NASDAQ ITCH 5.0 protocol parser"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+byteorder = "1.5"
+thiserror = "1.0"
+
