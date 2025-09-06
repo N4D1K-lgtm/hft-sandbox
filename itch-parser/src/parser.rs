@@ -2,9 +2,12 @@ use byteorder::{BigEndian, ReadBytesExt};
 use std::io::{Cursor, Read};
 
 use crate::prelude::{
-    Authenticity, BuySellIndicator, CrossType, FinancialStatusIndicator, ImbalanceDirection,
-    IssueClassification, ItchError, ItchMessage, MarketCategory, RegShoAction, Result,
-    SystemEventCode, TradingState,
+    Authenticity, BuySellIndicator, CrossType, EtpFlag, FinancialStatusIndicator,
+    ImbalanceDirection, InterestFlag, InverseIndicator, IpoFlag, IpoQuotationReleaseQualifier,
+    IssueClassification, ItchError, ItchMessage, LuldReferencePriceTier, MarketCategory,
+    MarketMakerMode, MarketParticipantState, PriceVariationIndicator, PrimaryMarketMaker,
+    Printable, RegShoAction, Result, RoundLotsOnly, ShortSaleThreshold, SystemEventCode,
+    TradingState,
 };
 
 #[derive(Default)]
@@ -75,16 +78,16 @@ impl ItchParser {
             market_category: MarketCategory::try_from_byte(cursor.read_u8()?)?,
             financial_status: FinancialStatusIndicator::try_from_byte(cursor.read_u8()?)?,
             round_lot_size: cursor.read_u32::<BigEndian>()?,
-            round_lots_only: cursor.read_u8()?,
+            round_lots_only: RoundLotsOnly::try_from_byte(cursor.read_u8()?)?,
             issue_classification: IssueClassification::try_from_byte(cursor.read_u8()?)?,
             issue_sub_type: Self::read_string(cursor, 2)?,
             authenticity: Authenticity::try_from_byte(cursor.read_u8()?)?,
-            short_sale_threshold: cursor.read_u8()?,
-            ipo_flag: cursor.read_u8()?,
-            luld_reference_price_tier: cursor.read_u8()?,
-            etp_flag: cursor.read_u8()?,
+            short_sale_threshold: ShortSaleThreshold::try_from_byte(cursor.read_u8()?)?,
+            ipo_flag: IpoFlag::try_from_byte(cursor.read_u8()?)?,
+            luld_reference_price_tier: LuldReferencePriceTier::try_from_byte(cursor.read_u8()?)?,
+            etp_flag: EtpFlag::try_from_byte(cursor.read_u8()?)?,
             etp_leverage_factor: cursor.read_u32::<BigEndian>()?,
-            inverse_indicator: cursor.read_u8()?,
+            inverse_indicator: InverseIndicator::try_from_byte(cursor.read_u8()?)?,
         })
     }
 
@@ -117,9 +120,9 @@ impl ItchParser {
             timestamp: ReadBytesExtU48::read_u48::<BigEndian>(cursor)?,
             mpid: Self::read_string(cursor, 4)?,
             stock: Self::read_string(cursor, 8)?,
-            primary_market_maker: cursor.read_u8()?,
-            market_maker_mode: cursor.read_u8()?,
-            market_participant_state: cursor.read_u8()?,
+            primary_market_maker: PrimaryMarketMaker::try_from_byte(cursor.read_u8()?)?,
+            market_maker_mode: MarketMakerMode::try_from_byte(cursor.read_u8()?)?,
+            market_participant_state: MarketParticipantState::try_from_byte(cursor.read_u8()?)?,
         })
     }
 
@@ -150,7 +153,7 @@ impl ItchParser {
             timestamp: ReadBytesExtU48::read_u48::<BigEndian>(cursor)?,
             stock: Self::read_string(cursor, 8)?,
             ipo_quotation_release_time: cursor.read_u32::<BigEndian>()?,
-            ipo_quotation_release_qualifier: cursor.read_u8()?,
+            ipo_quotation_release_qualifier: IpoQuotationReleaseQualifier::try_from_byte(cursor.read_u8()?)?,
             ipo_price: cursor.read_u32::<BigEndian>()?,
         })
     }
@@ -201,7 +204,7 @@ impl ItchParser {
             order_reference_number: cursor.read_u64::<BigEndian>()?,
             executed_shares: cursor.read_u32::<BigEndian>()?,
             match_number: cursor.read_u64::<BigEndian>()?,
-            printable: cursor.read_u8()?,
+            printable: Printable::try_from_byte(cursor.read_u8()?)?,
             execution_price: cursor.read_u32::<BigEndian>()?,
         })
     }
@@ -289,7 +292,7 @@ impl ItchParser {
             near_price: cursor.read_u32::<BigEndian>()?,
             current_reference_price: cursor.read_u32::<BigEndian>()?,
             cross_type: CrossType::try_from_byte(cursor.read_u8()?)?,
-            price_variation_indicator: cursor.read_u8()?,
+            price_variation_indicator: PriceVariationIndicator::try_from_byte(cursor.read_u8()?)?,
         })
     }
 
@@ -302,7 +305,7 @@ impl ItchParser {
             tracking_number: cursor.read_u16::<BigEndian>()?,
             timestamp: ReadBytesExtU48::read_u48::<BigEndian>(cursor)?,
             stock: Self::read_string(cursor, 8)?,
-            interest_flag: cursor.read_u8()?,
+            interest_flag: InterestFlag::try_from_byte(cursor.read_u8()?)?,
         })
     }
 }
