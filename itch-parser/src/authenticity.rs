@@ -5,7 +5,10 @@ use crate::prelude::{ItchError, Result};
 /// Denotes if an issue or quoting participant record is set-up in
 /// Nasdaq systems in a live/production, test, or demo state.
 ///
-/// TODO: docs
+/// | Value | Symbol | Description |
+/// |-------|--------|-------------|
+/// | `P` | Production | Live/Production trading environment |
+/// | `T` | Test | Test trading environment |
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum Authenticity {

@@ -2,7 +2,7 @@ use itch_parser::ItchParser;
 
 fn main() {
     let parser = ItchParser::new();
-    
+
     let system_event_data = vec![
         b'S', // message type
         0x00, 0x01, // stock locate

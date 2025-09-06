@@ -2,7 +2,9 @@ use byteorder::{BigEndian, ReadBytesExt};
 use std::io::{Cursor, Read};
 
 use crate::prelude::{
-    FinancialStatusIndicator, ItchError, ItchMessage, MarketCategory, Result, SystemEventCode,
+    Authenticity, BuySellIndicator, CrossType, FinancialStatusIndicator, ImbalanceDirection,
+    IssueClassification, ItchError, ItchMessage, MarketCategory, RegShoAction, Result,
+    SystemEventCode, TradingState,
 };
 
 #[derive(Default)]
@@ -74,9 +76,9 @@ impl ItchParser {
             financial_status: FinancialStatusIndicator::try_from_byte(cursor.read_u8()?)?,
             round_lot_size: cursor.read_u32::<BigEndian>()?,
             round_lots_only: cursor.read_u8()?,
-            issue_classification: cursor.read_u8()?,
+            issue_classification: IssueClassification::try_from_byte(cursor.read_u8()?)?,
             issue_sub_type: Self::read_string(cursor, 2)?,
-            authenticity: cursor.read_u8()?,
+            authenticity: Authenticity::try_from_byte(cursor.read_u8()?)?,
             short_sale_threshold: cursor.read_u8()?,
             ipo_flag: cursor.read_u8()?,
             luld_reference_price_tier: cursor.read_u8()?,
@@ -92,7 +94,7 @@ impl ItchParser {
             tracking_number: cursor.read_u16::<BigEndian>()?,
             timestamp: ReadBytesExtU48::read_u48::<BigEndian>(cursor)?,
             stock: Self::read_string(cursor, 8)?,
-            trading_state: cursor.read_u8()?,
+            trading_state: TradingState::try_from_byte(cursor.read_u8()?)?,
             reserved: cursor.read_u8()?,
             reason: Self::read_string(cursor, 4)?,
         })
@@ -104,7 +106,7 @@ impl ItchParser {
             tracking_number: cursor.read_u16::<BigEndian>()?,
             timestamp: ReadBytesExtU48::read_u48::<BigEndian>(cursor)?,
             stock: Self::read_string(cursor, 8)?,
-            reg_sho_action: cursor.read_u8()?,
+            reg_sho_action: RegShoAction::try_from_byte(cursor.read_u8()?)?,
         })
     }
 
@@ -159,7 +161,7 @@ impl ItchParser {
             tracking_number: cursor.read_u16::<BigEndian>()?,
             timestamp: ReadBytesExtU48::read_u48::<BigEndian>(cursor)?,
             order_reference_number: cursor.read_u64::<BigEndian>()?,
-            buy_sell_indicator: cursor.read_u8()?,
+            buy_sell_indicator: BuySellIndicator::try_from_byte(cursor.read_u8()?)?,
             shares: cursor.read_u32::<BigEndian>()?,
             stock: Self::read_string(cursor, 8)?,
             price: cursor.read_u32::<BigEndian>()?,
@@ -172,7 +174,7 @@ impl ItchParser {
             tracking_number: cursor.read_u16::<BigEndian>()?,
             timestamp: ReadBytesExtU48::read_u48::<BigEndian>(cursor)?,
             order_reference_number: cursor.read_u64::<BigEndian>()?,
-            buy_sell_indicator: cursor.read_u8()?,
+            buy_sell_indicator: BuySellIndicator::try_from_byte(cursor.read_u8()?)?,
             shares: cursor.read_u32::<BigEndian>()?,
             stock: Self::read_string(cursor, 8)?,
             price: cursor.read_u32::<BigEndian>()?,
@@ -241,7 +243,7 @@ impl ItchParser {
             tracking_number: cursor.read_u16::<BigEndian>()?,
             timestamp: ReadBytesExtU48::read_u48::<BigEndian>(cursor)?,
             order_reference_number: cursor.read_u64::<BigEndian>()?,
-            buy_sell_indicator: cursor.read_u8()?,
+            buy_sell_indicator: BuySellIndicator::try_from_byte(cursor.read_u8()?)?,
             shares: cursor.read_u32::<BigEndian>()?,
             stock: Self::read_string(cursor, 8)?,
             price: cursor.read_u32::<BigEndian>()?,
@@ -258,7 +260,7 @@ impl ItchParser {
             stock: Self::read_string(cursor, 8)?,
             cross_price: cursor.read_u32::<BigEndian>()?,
             match_number: cursor.read_u64::<BigEndian>()?,
-            cross_type: cursor.read_u8()?,
+            cross_type: CrossType::try_from_byte(cursor.read_u8()?)?,
         })
     }
 
@@ -281,12 +283,12 @@ impl ItchParser {
             timestamp: ReadBytesExtU48::read_u48::<BigEndian>(cursor)?,
             paired_shares: cursor.read_u64::<BigEndian>()?,
             imbalance_shares: cursor.read_u64::<BigEndian>()?,
-            imbalance_direction: cursor.read_u8()?,
+            imbalance_direction: ImbalanceDirection::try_from_byte(cursor.read_u8()?)?,
             stock: Self::read_string(cursor, 8)?,
             far_price: cursor.read_u32::<BigEndian>()?,
             near_price: cursor.read_u32::<BigEndian>()?,
             current_reference_price: cursor.read_u32::<BigEndian>()?,
-            cross_type: cursor.read_u8()?,
+            cross_type: CrossType::try_from_byte(cursor.read_u8()?)?,
             price_variation_indicator: cursor.read_u8()?,
         })
     }
@@ -380,7 +382,7 @@ mod tests {
                 assert_eq!(tracking_number, 2);
                 assert_eq!(timestamp, 3);
                 assert_eq!(order_reference_number, 4);
-                assert_eq!(buy_sell_indicator, b'B');
+                assert_eq!(buy_sell_indicator, BuySellIndicator::Buy);
                 assert_eq!(shares, 100);
                 assert_eq!(stock, "AAPL");
                 assert_eq!(price, 10000);

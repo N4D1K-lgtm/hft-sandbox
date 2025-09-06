@@ -14,6 +14,8 @@ pub enum ItchError {
         expected: &'static [char],
         actual: char,
     },
+    #[error("Invalid numeric field {field}: invalid value {value}")]
+    InvalidNumericField { field: &'static str, value: u64 },
 }
 
 pub type Result<T> = std::result::Result<T, ItchError>;
